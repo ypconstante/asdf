@@ -55,7 +55,7 @@ install_mock_plugin_repo() {
   git -C "${location}" config user.name "Test"
   git -C "${location}" config user.email "test@example.com"
   git -C "${location}" add -A
-  git -C "${location}" commit -q -m "asdf ${plugin_name} plugin"
+  git -C "${location}" commit -q --no-gpg-sign -m "asdf ${plugin_name} plugin"
 }
 
 install_mock_plugin_version() {
