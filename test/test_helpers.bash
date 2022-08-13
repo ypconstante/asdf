@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-# Unset ASDF_DIR because it may already be set by the users shell, and some
-# tests fail when it is set to something other than the temp dir.
+# Unset asdf environment variables because it may already be set by the users
+# shell, and some tests fail when it is set to something other than default
+# values
+unset ASDF_CONFIG_FILE
+unset ASDF_DATA_DIR
+unset ASDF_DEFAULT_TOOL_VERSIONS_FILENAME
 unset ASDF_DIR
 
 # shellcheck source=lib/utils.bash
