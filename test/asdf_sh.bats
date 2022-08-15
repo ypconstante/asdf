@@ -2,9 +2,8 @@
 
 load test_helpers
 
-# Helper function to handle sourcing of asdf.sh
-source_asdf_sh() {
-  . $(dirname "$BATS_TEST_DIRNAME")/asdf.sh
+setup() {
+  cd $(dirname "$BATS_TEST_DIRNAME")
 }
 
 cleaned_path() {
@@ -12,90 +11,88 @@ cleaned_path() {
 }
 
 @test "exports ASDF_DIR" {
-  result=$(
+  run bash -c "
     unset -f asdf
     unset ASDF_DIR
     PATH=$(cleaned_path)
 
-    source_asdf_sh
-    echo $ASDF_DIR
-  )
+    . asdf.sh
+    echo \$ASDF_DIR
+  "
 
-  output=$(echo "$result" | grep "asdf")
-  [ "$?" -eq 0 ]
+  [ "$status" -eq 0 ]
   [ "$output" != "" ]
 }
 
 @test "does not error if nounset is enabled" {
-  result=$(
+  run bash -c "
     unset -f asdf
     unset ASDF_DIR
     PATH=$(cleaned_path)
     set -o nounset
 
-    source_asdf_sh
-    echo $ASDF_DIR
-  )
+    . asdf.sh
+    echo \$ASDF_DIR
+  "
 
-  output=$(echo "$result" | grep "asdf")
-  [ "$?" -eq 0 ]
+  [ "$status" -eq 0 ]
   [ "$output" != "" ]
 }
 
 @test "adds asdf dirs to PATH" {
-  result=$(
+  run bash -c "
     unset -f asdf
     unset ASDF_DIR
     PATH=$(cleaned_path)
 
-    source_asdf_sh
-    echo $PATH
-  )
+    . asdf.sh
+    echo \$PATH
+  "
 
-  output=$(echo "$result" | grep "asdf")
-  [ "$?" -eq 0 ]
-  [ "$output" != "" ]
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "asdf" ]]
 }
 
 @test "does not add paths to PATH more than once" {
-  result=$(
+  run bash -c "
     unset -f asdf
     unset ASDF_DIR
     PATH=$(cleaned_path)
 
-    source_asdf_sh
-    source_asdf_sh
-    echo $PATH
-  )
+    . asdf.sh
+    . asdf.sh
+    echo \$PATH
+  "
 
-  output=$(echo $result | tr ':' '\n' | grep "asdf" | sort | uniq -d)
-  [ "$?" -eq 0 ]
-  [ "$output" = "" ]
+  [ "$status" -eq 0 ]
+  repeated_paths=$(echo "$output" | tr ':' '\n' | grep "asdf" | sort | uniq -d)
+  [ "$repeated_paths" = "" ]
 }
 
 @test "defines the asdf function" {
-  output=$(
+  run bash -c "
     unset -f asdf
     unset ASDF_DIR
     PATH=$(cleaned_path)
 
-    source_asdf_sh
+    . asdf.sh
     type asdf
-  )
+  "
 
+  [ "$status" -eq 0 ]
   [[ "$output" =~ "is a function" ]]
 }
 
 @test "function calls asdf command" {
-  result=$(
+  run bash -c "
     unset -f asdf
     ASDF_DIR=$(pwd)
     PATH=$(cleaned_path)
 
-    source_asdf_sh
+    . asdf.sh
     asdf info
-  )
-  [ "$?" -eq 0 ]
-  output=$(echo "$result" | grep "ASDF INSTALLED PLUGINS:")
-  [ "$output" != "" ]
+  "
+
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "ASDF INSTALLED PLUGINS:" ]]
 }

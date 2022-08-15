@@ -37,8 +37,7 @@ cleaned_path() {
  "
 
   [ "$status" -eq 0 ]
-  asdf_paths=$(echo "$output" | grep "asdf")
-  [ "$asdf_paths" != "" ]
+  [[ "$output" =~ "asdf" ]]
 }
 
 @test "does not add paths to PATH more than once" {
