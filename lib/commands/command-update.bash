@@ -21,7 +21,7 @@ do_update() {
   if [ "$update_to_head" = "--head" ]; then
     # Update to latest on the master branch
     git fetch origin master
-    git checkout master
+    git checkout -B master
     git reset --hard origin/master
     printf "Updated asdf to latest on the master branch\\n"
   else
