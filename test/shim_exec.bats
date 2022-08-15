@@ -39,7 +39,6 @@ teardown() {
 
   path=$(echo "$PATH" | sed -e "s|$(asdf_data_dir)/shims||g; s|::|:|g")
   run env PATH=$path which dummy
-  [ "$output" == "" ]
   [ "$status" -eq 1 ]
 
   run env PATH=$path asdf exec dummy world hello
