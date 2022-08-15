@@ -11,7 +11,7 @@ cleaned_path() {
 }
 
 @test "exports ASDF_DIR" {
-  output=$(fish -c "
+  run fish -c "
     set -e asdf
     set -e ASDF_DIR
     set -e ASDF_DATA_DIR
@@ -19,13 +19,14 @@ cleaned_path() {
 
     . asdf.fish
     echo \$ASDF_DIR
-  ")
-  [ "$?" -eq 0 ]
+  "
+
+  [ "$status" -eq 0 ]
   [ "$output" != "" ]
 }
 
 @test "adds asdf dirs to PATH" {
-  result=$(fish -c "
+  run fish -c "
     set -e asdf
     set -e ASDF_DIR
     set -e ASDF_DATA_DIR
@@ -33,14 +34,15 @@ cleaned_path() {
 
     . (pwd)/asdf.fish  # if the full path is not passed, status -f will return the relative path
     echo \$PATH
- ")
-  [ "$?" -eq 0 ]
-  output=$(echo "$result" | grep "asdf")
-  [ "$output" != "" ]
+ "
+
+  [ "$status" -eq 0 ]
+  asdf_paths=$(echo "$output" | grep "asdf")
+  [ "$asdf_paths" != "" ]
 }
 
 @test "does not add paths to PATH more than once" {
-  result=$(fish -c "
+  run fish -c "
     set -e asdf
     set -e ASDF_DIR
     set -e ASDF_DATA_DIR
@@ -49,35 +51,37 @@ cleaned_path() {
     . asdf.fish
     . asdf.fish
     echo \$PATH
-  ")
-  [ "$?" -eq 0 ]
-  output=$(echo $result | tr ' ' '\n' | grep "asdf" | sort | uniq -d)
-  [ "$output" = "" ]
+  "
+
+  [ "$status" -eq 0 ]
+  repeated_paths=$(echo "$output" | tr ' ' '\n' | grep "asdf" | sort | uniq -d)
+  [ "$repeated_paths" = "" ]
 }
 
 @test "defines the asdf function" {
-  output=$(fish -c "
+  run fish -c "
     set -e asdf
     set -e ASDF_DIR
     set PATH $(cleaned_path)
 
     . asdf.fish
     type asdf
-  ")
-  [ "$?" -eq 0 ]
+  "
+
+  [ "$status" -eq 0 ]
   [[ "$output" =~ "is a function" ]]
 }
 
 @test "function calls asdf command" {
-  result=$(fish -c "
+  run fish -c "
     set -e asdf
     set -x ASDF_DIR $(pwd)
     set PATH $(cleaned_path)
 
     . asdf.fish
     asdf info
-  ")
-  [ "$?" -eq 0 ]
-  output=$(echo "$result" | grep "ASDF INSTALLED PLUGINS:")
-  [ "$output" != "" ]
+  "
+
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ "ASDF INSTALLED PLUGINS:" ]]
 }
